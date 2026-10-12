@@ -1,0 +1,51 @@
+抖音开发者工具 —— UnityPlugin 报错修复步骤
+================================================
+报错：Can't find module __plugin_tt674511f8f84ea91612/index.js
+结论：工具端「UnityPlugin 插件包」缓存损坏，与本工程代码无关。
+（上次的 LocalCacheConfig 序列化报错已经消失，那部分已修好。）
+
+
+【我已经做的】
+把损坏的插件包挪走了（保留了备份，可随时还原）：
+
+  原路径  %APPDATA%\@byted\vela\tempFile\pc-sdk\micro-plugin-packages\tt674511f8f84ea91612
+  已改名  ...\micro-plugin-packages\tt674511f8f84ea91612.bak-20260920
+
+证据：该目录里的 index.js 实测 md5 = 39d62d503103f2b6710a0d7612f1e743
+      而同目录 signature.json 里的期望 md5 = 7f6d9b97a6c070d65e4260535968bde7
+      → 两者不一致，缓存文件不是官方发布的那个文件。
+
+
+【请你按顺序做】
+1. 确认开发者工具已完全退出（含托盘/后台残留）。
+
+2. 暂时关掉 Clash Verge 的系统代理（或退出 Clash）。
+   为什么要关：插件包要联网重新下载，而工具的下载超时只有 5 秒，
+   代理一慢就会失败。你的系统代理当前是开着的：
+       注册表 HKCU\...\Internet Settings → ProxyServer = 127.0.0.1:7897
+       工具会话里 localIp = 198.18.0.1（Clash fake-IP），说明它确实走代理。
+
+3. 重新打开工具、打开本工程（打开 D:\...\tt-minigame\tt-minigame）。
+   工具会自动重新下载 UnityPlugin 4.41.2。首次打开多等一会儿。
+
+4. 看 Console：
+   只有 [TMG] use engine: helium 之类的正常输出 = 修好了；
+   如果又出现同一条红字，走下面的【备选】。
+
+
+【备选方案（按顺序试）】
+A. 用工具自带菜单：「清除缓存」→ 选「游戏插件缓存」，然后重开工程。
+B. 还原备份再重下（先退出工具）：
+     把 tt674511f8f84ea91612.bak-20260920 改回 tt674511f8f84ea91612
+     再执行第 2、3 步。
+C. 降插件版本（前面都无效才做）：
+     改 Assets\Plugins\ByteGame\com.bytedance.starksdk\DefaultTemplate\game.json
+       "UnityPlugin": { "version": "4.39.0", ... }   ← 换成你其他工程验证过的版本
+     然后回 Unity 重新打包。你其他工程在用的是 4.26.4 / 4.35.0 / 4.38.0 / 4.39.0，
+     只有本工程、AttackHole、PixelShooter3DJam 用 4.41.2。
+
+
+【下次自查用的一行命令】
+  D="$APPDATA/@byted/vela/tempFile/pc-sdk/micro-plugin-packages/tt674511f8f84ea91612/online"
+  md5sum "$D/index.js" && cat "$D/signature.json"
+  两个 md5 不一致 = 缓存又坏了，重复上面第 1～3 步。

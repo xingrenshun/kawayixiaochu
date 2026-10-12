@@ -1,0 +1,80 @@
+抖音开发者工具启动失败（protocol mismatch）修复步骤
+====================================================
+日期：2026-09-20
+工程：D:\Unity\Unity2022_卡哇伊连连看_SlidingMerge\Unity2022_SlidingMerge\Unity2022_SlidingMerge
+
+----------------------------------------------------
+一、报错现象
+----------------------------------------------------
+【1】模拟器启动过程中加载失败，可能对功能产生影响，请刷新或退出重试
+    错误详情: LaunchError: mp_launch_error in phase mp_request_meta
+              setting error: AssertionError [ERR_ASSERTION]: protocol mismatch
+【2】Uncaught ReferenceError: afterLoadGamesJs is not defined
+     at WPS4_<guid>:54 / #afterLoadGameJs / HTMLScriptElement.onload
+
+第【2】条是连带的无效报错（IDE 注入脚本走到异常分支），不用管。
+真正的失败点是第【1】条：启动的第一个网络阶段就挂了，游戏根本没开始加载。
+
+----------------------------------------------------
+二、根因（已确认）
+----------------------------------------------------
+Clash Verge（mixed-port 7897）把代理地址永久写进了用户级环境变量，
+但退出/崩溃时不会自动清理：
+
+    HKCU\Environment
+        HTTP_PROXY    = http://127.0.0.1:7897     <-- 残留
+        HTTPS_PROXY   = http://127.0.0.1:7897     <-- 残留
+
+此时 Clash 内核并没有在运行（7897 端口没有 LISTENING，只剩残 socket），
+而抖音开发者工具是 Electron/Node，启动时会继承这两个变量 ——
+于是它发出的所有请求（连访问本地 127.0.0.1:7044 的请求也一样）都被塞进这个死代理，
+请求层构造出非法 options，Node 直接抛协议断言错误，启动阶段第一步就失败 → 白屏。
+
+旁证：
+  · 工具日志 %APPDATA%\@byted\vela\logs\<会话>\main.log 刷屏
+      Error: Tea report error, connect ECONNREFUSED 127.0.0.1:7897
+  · 直连 ib.snssdk.com / developer.toutiao.com 完全正常（200 / 301）
+  · 走 -x http://127.0.0.1:7897 代理则连不上
+
+⚠️ 注意：HKCU\...\Internet Settings\ProxyEnable（系统代理开关）
+   和 HKCU\Environment\HTTP_PROXY（环境变量代理）是两套独立入口。
+   本次 ProxyEnable=0（看起来"没代理"），但 HTTP_PROXY 还在。
+   只查前者会把"有代理"误判成"没代理"。
+
+----------------------------------------------------
+三、修复步骤
+----------------------------------------------------
+第 1 步：删除残留的代理环境变量（已在 2026-09-20 由助手执行完毕）
+
+    reg delete "HKCU\Environment" /v HTTP_PROXY  /f
+    reg delete "HKCU\Environment" /v HTTPS_PROXY /f
+    reg query  "HKCU\Environment"
+
+  原值备份（需要时可手动加回）：
+    HTTP_PROXY  = http://127.0.0.1:7897
+    HTTPS_PROXY = http://127.0.0.1:7897
+
+第 2 步：完全退出抖音开发者工具
+    - 关掉所有窗口
+    - 右键任务栏托盘图标 → 退出
+    - 任务管理器里确认没有残留进程（抖音开发者工具 / pcsdk / miniapp 等）
+    * 环境变量对已启动的进程无效，不重启工具等于没改 *
+
+第 3 步：重新打开工具 → 清除缓存 → 编译
+    网络恢复后，工具会自动重新下载 UnityPlugin 插件包
+    （%APPDATA%\@byted\vela\tempFile\pc-sdk\micro-plugin-packages 目前是空的，属正常，会自动补上）
+
+第 4 步（如果第 3 步仍然复现）
+    说明 explorer.exe 还持有旧的环境块，注销一次或直接重启电脑即可。
+
+----------------------------------------------------
+四、以后怎么避免
+----------------------------------------------------
+方案 A（推荐）：需要 Clash 时就让它常开，不用时"退出"要确保它自己把
+              系统代理和环境变量都清干净（设置里不要开启"写入环境变量"类选项）。
+方案 B：用 Clash 的时候只开"系统代理"（TUN 关闭），不要用环境变量方式；
+       用完在设置里确认 HKCU\Environment 里没有 HTTP_PROXY 残留。
+
+判断口诀：
+  只要工具报错阶段是 mp_request_meta，或日志里出现 127.0.0.1:7897，
+  就先查环境变量 + 端口，别去动工程和包体。

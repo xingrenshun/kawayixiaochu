@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb5a920a7cf014938b2abed64c669cf5, type: 3}
+  m_Name: LocalCacheConfig
+  m_EditorClassIdentifier: 
+  aesKey: cWwb7x3huYmXQ78tNikJnVd1hsw83KIVg8/t18OB6eU=
+  aesIv: eyZGrS+XNDXuoBVjGvO7XQ==
+  serverBaseUrl: api.sakura-forever.cn/api/v1
+  useSsl: 1
+  failRetryCount: 1
+  apiKey: 
+  douyinAppId: 
+  bannerIds:
+  - adunit-e7b2815186475e80
+  - adunit-81d0df613e78a577
+  - adunit-3668482168b251c6
+  - adunit-28550a64e5b8b320
+  - adunit-4b7e81ed7e331eff
+  preferred: []
+  interstitials: adunit-4e9b5535bad55942
+  videoId: adunit-802a5a1e0afd2919

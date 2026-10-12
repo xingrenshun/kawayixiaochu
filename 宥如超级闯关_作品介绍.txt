@@ -1,0 +1,34 @@
+《宥如超级闯关》作品介绍
+
+============================== 作品介绍（完整版） ==============================
+
+《宥如超级闯关》是一款卡哇伊风格的图案配对消除闯关小游戏，收录近两百种萌趣图标与多套主题。玩家扮演挑战者，在棋盘里找出两个相同图案，用不超过两个转角的路线连通即可消除；第2关起，棋盘会随机旋转、镜像或波浪位移，边界图标被消除时还会触发连锁消除，搭配最高十倍的连击加成，连消起来十分爽快。游戏设有三种模式：关卡模式按目标分数逐关推进，棋盘尺寸与障碍随进度递增；眼力模式是90秒限时挑战，通关第5关后解锁；记忆模式则翻牌配对，翻错一组扣一点体力，比拼最短通关用时。全部翻转、精准锁定、炸弹三种道具随时救场，体力上限十点、可离线自动恢复，另配总分榜、记忆榜与成绩分享。点击主界面模式按钮即可开始游戏。
+（字数：含标点 297 字，纯汉字 264 字）
+
+============================== 游戏简介（短版） ==============================
+
+卡哇伊配对消除小游戏，连通两枚相同图案即可消除；棋盘随机旋转、镜像与波浪位移，含关卡、眼力、记忆三模式，连击最高十倍。
+（字数：含标点 59 字，纯汉字 51 字）
+
+
+-------------------------------- 取材来源（工程实测） --------------------------------
+游戏名：宥如超级闯关（由「云析快乐闯关游戏软件」改名）
+项目：D:\Unity\Unity2022_卡哇伊连连看_SlidingMerge\Unity2022_SlidingMerge\Unity2022_SlidingMerge
+
+· 图标数量         Assets/Resources/UI/GameIcons → 198 张（近两百种）
+· 主题数据         Assets/Resources/ScriptAssets/游戏主题数据.asset（多套主题）
+· 配对规则         用不超过两个转角的路线连通两枚相同图案（连连看式消除）
+· 棋盘变形         GridRotationManager：第一关不旋转，第2关起旋转
+                    GridTransformManager：Rotate(旋转) / Mirror(镜像) / Wave(波浪移动)
+· 连锁消除         BoundaryChainEliminator：边界元素被消除时检查对立边界同元素并连锁消除
+· 连击倍率         Runtime.cs：combo = Mathf.Min(10, combo + 1) → 最高十倍
+· 三种模式         HomeView.cs：Button-Mode1 关卡模式 / Button-Mode2 眼力模式 / Button-Mode3 记忆模式
+· 眼力模式时长     Runtime.cs：passTime = 90f → 90 秒
+· 解锁条件         PlayerLevel >= 5 才可进入眼力模式，否则提示「通关第5关解锁」
+· 记忆模式         MemoryGameView.cs：翻牌配对，翻错一组扣 1 点体力，体力耗尽本局失败；
+                    计时 _roundElapsedTime，结算显示最好用时（LocalMemoryBestTime）
+· 三种道具         FlipAllPowerUp(全部翻转) / PrecisionLockPowerUp(精准锁定) / BoomGrid(炸弹)
+· 体力             PlayerLocalData.cs：MAX_STAMINA = 10；离线按时间自动恢复
+· 榜单             RankingView.cs：BOARD_TOTAL「总分榜」/ BOARD_MEMORY「记忆榜」
+· 分享             ShareView.cs：FPlatformCore → 抖音 TT.ShareAppMessage
+· 屏幕方向         game.json：deviceOrientation = portrait（竖屏）
