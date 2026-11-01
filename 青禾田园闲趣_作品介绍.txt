@@ -1,0 +1,77 @@
+《青禾田园闲趣》作品介绍
+
+============================== 作品介绍（完整版） ==============================
+
+《青禾田园闲趣》是卡通风格的图案连线消除游戏。棋盘近百种可爱图案与十四套配色，每局随机更换。玩家需找出两个相同的图案，拐弯不超过两次连通即消除。首关静止，第二关起消除后有几率整体旋转、镜像或波浪错位。边界图案被消除时若对面有同款，中间整排一起消失。连消把倍率叠至十倍，中断重置。关卡模式需清空整盘，往后棋盘更大、障碍更密；限时九十秒的抢分玩法需通关第五关开启，按得分结算；记忆模式把图案朝向背面，两张一对翻开配对，翻错扣一点体力。另备全部翻转与精准锁定道具，库存用尽可看激励视频获取。体力最多存十点，离开后按时回复。无路可消时自动重排。内置总分与记忆两张榜单，成绩可分享。在主界面选择模式即可进入。
+（字数：含标点 299 字，纯汉字 269 字）
+
+============================== 游戏简介（短版） ==============================
+
+《青禾田园闲趣》是近百种可爱图案的连线消除游戏，两个同样的图案拐两次弯内即连成消除，棋盘会随机旋转镜像，含三种模式。
+（字数：含标点 58 字，纯汉字 52 字）
+
+
+----------------------- 覆盖维度说明（对应审核要求） -----------------------
+· 游戏背景／场景：卡通风格棋盘，九十九种图案与十四套主题配色，每局随机更换一套
+· 扮演角色：玩家本人，无固定角色设定
+· 游戏角色(NPC)：本作无剧情与 NPC（代码无任何 NPC 系统），如实不写
+· 主要情节：休闲消除类无主线剧情，乐趣集中在棋盘变化与逐关推进
+· 玩法：找出两个相同图案，拐弯不超过两次连通即可消除
+· 功能系统：关卡／眼力／记忆三模式、记忆模式道具、体力、连击、两张榜单、成绩分享
+· 主要特点：第二关起棋盘随机旋转／镜像／波浪错位、边界整排连锁、最高十倍连击、无解自动重排
+· 使用方法：在主界面选择模式即可进入
+
+
+-------------------------------- 取材来源（工程实测） --------------------------------
+游戏名：青禾田园闲趣（同一款游戏的第 6 个马甲名；此前已出过《宥如超级闯关》《昇辉超级闯关》
+        《龙息山谷探险》《甜趣闯关消消》《云析快乐闯关游戏软件》）
+项目：D:\Unity\Unity2022_卡哇伊连连看_SlidingMerge\Unity2022_SlidingMerge\Unity2022_SlidingMerge
+
+【本次复核修正的三处旧稿错误，后续版本务必沿用修正值】
+
+1) 图案数量 = 99 种，不是「近两百种」
+   Assets/Resources/UI/GameIcons 下只有 99 个 png（GameIcons-id-0 ~ GameIcons-id-98），
+   此前统计到的 198 是「99 个 png + 99 个 .meta」的文件总数，把 .meta 误算了。
+   代码侧印证：Runtime.memoryModeMaxIconId = 98，且 [FResourcesLoad("UI/GameIcons", true)] 只加载该目录。
+   → 本稿写「近百种」。
+
+2) 炸弹道具没有生效，本稿已不再提及
+   BoomSpawner.SpawnBoom 的唯一调用点 AutoLayoutGameView.cs:410 已被注释；
+   _boomGrids 只声明与初始化，从未填充或使用；BoomSpawner 仅被 new 出来与 Reset。
+   → 旧稿「全部翻转、精准锁定、炸弹三种道具」中的炸弹属空壳。
+   → 记忆模式实际只有两种道具：全部翻转（FlipAllPowerUp）、精准锁定（PrecisionLockPowerUp）。
+   → 另注意 Ui/PowerUpButton.cs 全工程无任何引用，是死代码。
+
+3) 关卡模式是「清空棋盘」过关，不是「按目标分数逐关推进」
+   AutoLayoutGameView.CheckIsWin() 只在 _gameGirds.Count == 0 时结算；
+   目标分（Runtime.currentLevelTargetScore = 动态目标分 5000 × 面积倍率）仅作计分基准，未达标不判负。
+   过关后 PlayerLevel++（GameWinView.OnSetup，Runtime.mode == 0）。
+   → 本稿写「关卡模式需清空整盘」。
+
+【其余实测依据】
+· 主题配色 14 套   Assets/Resources/ScriptAssets/游戏主题数据.asset → themes 14 条
+                   （shallowColor / deepColor / cardBack）；UpdateTheme() 每关随机取一套
+· 配对规则          Algorithm/ShortestPath.cs + QuickOneNet.cs：0 折 / 1 折 / 2 折路径判定
+· 棋盘变形          GridTransformManager.ShouldTransform() = _currentLevel >= 2 && Random.value < 0.3f
+                   即首关不变形，第二关起每次消除后约三成概率触发；类型 Rotate / Mirror / Wave
+                   （GridRotationManager 全工程无引用，已被 GridTransformManager 取代）
+· 边界连锁          BoundaryChainEliminator.CheckBoundaryChain：消除点在对立边界有同款时，
+                   收集两点之间格子并整排消除（AutoLayoutGameView:407 调用）
+· 连击上限          Runtime.cs:226 combo = Mathf.Min(10, combo + 1)，COMBO_INTERVAL 超时回落至 1
+· 无解自动重排      AutoLayoutGameView 确保可消除对：DeadlockDetector.HasValidMove 为假时循环 AutoShuffle
+· 新手引导          开局取一组 ValidPairs 高亮提示（FUiHighlighter）
+· 关卡档位          7 档：ScriptAssets/关卡配置.asset（panelWidth/Height 取 365 / 730 / -1 自适应，
+                   障碍系数 0 ~ 0.10，空白格组 0 / 4 / 8）
+· 眼力模式          Runtime.cs:108 passTime = 90f；倒计时归零 → GameWinView 标题「游戏结束」
+· 解锁条件          HomeView.StartGameMode2：PlayerNetData.PlayerLevel >= 5，否则提示「通关第5关解锁」
+· 记忆模式          MemoryGameView 引导文案「翻错一组会扣 1 点体力，体力耗尽时本局会失败」；
+                   MemoryGameWinView 标题「通关成功／体力耗尽」；
+                   开局随机翻开 5 ~ 12 张（Runtime.memoryModeDefaultOpenedMinCount / MaxCount）
+· 记忆模式道具      库存 > 0 时扣库存激活，库存为 0 时 FAds.Instance.Video 看完激励视频激活；
+                   MemoryPowerUp 带 cooldownTime 冷却
+· 体力              PlayerLocalData.cs MAX_STAMINA = 10，离线按时间恢复；
+                   VideoStaminaView 看完激励视频 +10
+· 榜单              RankingView：BOARD_TOTAL「总分榜」/ BOARD_MEMORY「记忆榜」；
+                   GameWinView 内 PaiHangBang.UploadScore 上报抖音排行榜
+· 分享              ShareView → FPlatformCore
+· 屏幕方向          game.json：deviceOrientation = portrait（竖屏）

@@ -378,11 +378,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   aaa: {fileID: 0}
   adPlatformType: 0
-  AppId: 
+  AppId: ttced8b86550a6948902
   videoAdIdList:
-  - b7k1koejfdn47gsmk9
+  - kkkc0f481ki3b6a856
   interAdIdList:
-  - 4n2gmb2je33mpgi7om
+  - 18b502j2adj62djpm6
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

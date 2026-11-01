@@ -52,7 +52,7 @@ MonoBehaviour:
   NativeWhiteListRegex:
   - com.bytedance.starksdk
   - _Backup~
-  _appId: tt7a2c0c91e4554b7502
+  _appId: ttced8b86550a6948902
   version: 
   autoVersion: 0
   _webglPackagePath: 
